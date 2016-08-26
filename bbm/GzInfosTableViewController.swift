@@ -17,32 +17,61 @@ class GzInfosTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
+        
+        initnavbar("收藏信息")
+        self.tableView.registerClass(OneTableViewCell.self, forCellReuseIdentifier: "cell")//注册自定义cell
+        tableView.estimatedRowHeight = 250
+        //setSeparatorInset:UIEdgeInsetsMake
+        tableView.rowHeight = UITableViewAutomaticDimension
+        
+        self.tableView.separatorStyle = UITableViewCellSeparatorStyle.None
+        //设置分割线颜色
+        self.tableView.separatorColor = UIColor.redColor()
+        //设置分割线内边距
+        self.tableView.separatorInset = UIEdgeInsetsMake(5, 0, 0, 0)
 
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
-        
-        self.navigationItem.title="收藏信息"
-        self.navigationItem.leftBarButtonItem=UIBarButtonItem(title: "返回", style: UIBarButtonItemStyle.Done, target: self, action: "backClick")
-//        self.tableView.headerView = XWRefreshNormalHeader(target: self, action: "upPullLoadData")
-//        
-//        self.tableView.headerView?.beginRefreshing()
-//        self.tableView.headerView?.endRefreshing()
-//        
-//        self.tableView.footerView = XWRefreshAutoNormalFooter(target: self, action: "downPlullLoadData")
-        
         querydata()
         
         
     }
     
+    func initnavbar(titlestr:String)
+    {
+        self.title=titlestr
+        var returnimg=UIImage(named: "xz_nav_return_icon")
+        
+        let item3=UIBarButtonItem(image: returnimg, style: UIBarButtonItemStyle.Plain, target: self,  action: #selector(GzInfosTableViewController.backClick))
+        
+        item3.tintColor=UIColor.whiteColor()
+        
+        self.navigationItem.leftBarButtonItem=item3
+        
+        
+        
+        
+        var searchimg=UIImage(named: "xz_nav_icon_search")
+        
+        let item4=UIBarButtonItem(image: searchimg, style: UIBarButtonItemStyle.Plain, target: self,  action: #selector(GzInfosTableViewController.searchClick))
+        
+        item4.tintColor=UIColor.whiteColor()
+        
+        self.navigationItem.rightBarButtonItem=item4
+    }
     func backClick()
     {
         NSLog("back");
         self.navigationController?.popViewControllerAnimated(true)
-        
     }
+    
+    func searchClick()
+    {
+        var sb = UIStoryboard(name:"Main", bundle: nil)
+        var vc = sb.instantiateViewControllerWithIdentifier("souviewcontroller") as! SouViewController
+        self.navigationController?.pushViewController(vc, animated: true)
+        //var vc = SearchViewController()
+        //self.navigationController?.pushViewController(vc, animated: true)
+    }
+  
     
     
     //MARK: 加载数据
@@ -84,113 +113,134 @@ class GzInfosTableViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+            
         
-        var ppp:String = (items[indexPath.row] as itemMess).photo;
-        if ppp.characters.count > 0
+        var str:String = "cell"
+        
+        var cell:OneTableViewCell = tableView.dequeueReusableCellWithIdentifier(str, forIndexPath: indexPath) as! OneTableViewCell
+        
+        if cell.isEqual(nil) {
+            cell = OneTableViewCell(style: UITableViewCellStyle.Default, reuseIdentifier: str)
+        }
+        //var senduser=(items[indexPath.row] as itemMess).username
+        var namestr:String=(items[indexPath.row] as itemMess).username
+        
+        cell.username.text = namestr//array[indexPath.row]//(items[indexPath.row] as itemMess).username
+        
+        
+        let options:NSStringDrawingOptions = .UsesLineFragmentOrigin
+        //let options:NSStringDrawingOptions = .UsesLineFragmentOrigin
+        
+        let boundingRect = namestr.boundingRectWithSize(CGSizeMake(200, 0), options: options, attributes:[NSFontAttributeName:cell.username.font], context: nil)
+        
+        if((items[indexPath.row] as itemMess).sex == "0")
         {
-            let cellId="mycell"
-            var cell:InfopicTableViewCell? = tableView.dequeueReusableCellWithIdentifier(cellId) as! InfopicTableViewCell?
-            if(cell == nil)
-            {
-                cell = InfopicTableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: cellId)
-            }
+            cell.seximg.image=UIImage(named: "xz_nan_icon")
             
-            cell?.senduser.text=(items[indexPath.row] as itemMess).username
-            cell?.message.text=(items[indexPath.row] as itemMess).content
-            cell?.sendtime.text=(items[indexPath.row] as itemMess).time
-            cell?.sendaddress.text=(items[indexPath.row] as itemMess).address
-            if ((items[indexPath.row] as itemMess).infocatagory == "0")
-            {
-                cell?.catagory.text="求"
-                
-            }else if ((items[indexPath.row] as itemMess).infocatagory == "1")
-            {
-                cell?.catagory.text="寻"
-            }else if ((items[indexPath.row] as itemMess).infocatagory == "2")
-            {
-                cell?.catagory.text="转"
-            }else if ((items[indexPath.row] as itemMess).infocatagory == "3")
-            {
-                cell?.catagory.text="帮"
-            }
-            
-            if((items[indexPath.row] as itemMess).photo.isKindOfClass(NSNull))
-            {
-                cell?.icon.image=UIImage(named: "icon")
-                cell?.icon.layer.cornerRadius = 5.0
-                cell?.icon.layer.masksToBounds = true
-                
-            }else
-            {
-                var head:String!
-                
-                if ppp.characters.count > 0
-                {
-                    if((ppp.rangeOfString(",") ) != nil)
-                    {
-                        var myArray = ppp.componentsSeparatedByString(",")
-                        var headname = myArray[0] as String
-                        head = "http://api.bbxiaoqu.com/uploads/"+headname
-                        
-                        NSLog("-1--\(head)")
-                    }else
-                    {
-                        head = "http://api.bbxiaoqu.com/uploads/"+ppp
-                        NSLog("-2--\(head)")
-                    }
-                    
-                    NSLog("\((items[indexPath.row] as itemMess).photo)")
-                    
-                    Alamofire.request(.GET, head!).response { (_, _, data, _) -> Void in
-                        if let d = data as? NSData!
-                        {
-                            cell?.icon.image=UIImage(data: d)
-                        }
-                    }
-                }else
-                {
-                    cell?.icon.image=UIImage(named: "icon")
-                }
-                cell?.icon.layer.cornerRadius = 5.0
-                cell?.icon.layer.masksToBounds = true
-            }
-            cell?.gz.text="关:"+(items[indexPath.row] as itemMess).visnum;
-            cell?.pl.text="评:"+(items[indexPath.row] as itemMess).plnum;
-            return cell!
         }else
         {
-            let cellId="mycell1"
-            var cell:InfoTableViewCell? = tableView.dequeueReusableCellWithIdentifier(cellId) as! InfoTableViewCell?
-            if(cell == nil)
-            {
-                cell = InfoTableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: cellId)
-            }
-            cell?.senduser.text=(items[indexPath.row] as itemMess).username
-            cell?.Message.text=(items[indexPath.row] as itemMess).content
-            cell?.sendtime.text=(items[indexPath.row] as itemMess).time
-            cell?.sendaddress.text=(items[indexPath.row] as itemMess).address
-            
-            
-            if ((items[indexPath.row] as itemMess).infocatagory == "0")
-            {
-                cell?.catagory.text="求"
-                
-            }else if ((items[indexPath.row] as itemMess).infocatagory == "1")
-            {
-                cell?.catagory.text="寻"
-            }else if ((items[indexPath.row] as itemMess).infocatagory == "2")
-            {
-                cell?.catagory.text="转"
-            }else if ((items[indexPath.row] as itemMess).infocatagory == "3")
-            {
-                cell?.catagory.text="帮"
-            }
-            
-            cell?.gz.text="关:"+(items[indexPath.row] as itemMess).visnum;
-            cell?.pl.text="评:"+(items[indexPath.row] as itemMess).plnum;
-            
-            return cell!
+            cell.seximg.image=UIImage(named: "xz_nv_icon")
         }
+        cell.seximg.frame=CGRectMake(boundingRect.width+70, 25, 10, 15)
+        
+        
+        
+        
+        if (items[indexPath.row] as itemMess).street.characters.count > 0
+        {
+            cell.street.text=(items[indexPath.row] as itemMess).street
+        }else
+        {
+            cell.street.text="未知"
+        }
+        
+        
+        let streettr:String = cell.street.text!
+        
+        
+        let distanceboundingRect = streettr.boundingRectWithSize(CGSizeMake(200, 0), options: options, attributes:[NSFontAttributeName:cell.street.font], context: nil)
+        cell.distance.frame=CGRectMake(distanceboundingRect.width+70, 43, distanceboundingRect.width*2, 30)
+        cell.distance.text=(items[indexPath.row] as itemMess).address
+        
+        cell.timesgo.text=(items[indexPath.row] as itemMess).time
+        
+        
+        
+        
+        
+        
+        cell.content.text=(items[indexPath.row] as itemMess).content
+        
+        if((items[indexPath.row] as itemMess).headface.characters.count>0)
+        {
+            var myhead:String="http://api.bbxiaoqu.com/uploads/".stringByAppendingString((items[indexPath.row] as itemMess).headface)
+            
+            let myheadnsd = NSData(contentsOfURL:NSURL(string: myhead)!)
+            cell.headface.image=UIImage(data: myheadnsd!);
+            
+            cell.headface.layer.cornerRadius = cell.headface.frame.width / 2
+            // image还需要加上这一句, 不然无效
+            cell.headface.layer.masksToBounds = true
+        }
+        let bw:CGFloat = UIScreen.mainScreen().bounds.width-20
+        var index=0
+        
+        var photoArr:[String] = (items[indexPath.row] as itemMess).photo.characters.split{$0 == ","}.map{String($0)}
+        
+        
+        var picnum=photoArr.count
+        if(picnum>4)
+        {
+            picnum=4
+        }
+        
+        let count = 4;
+        for(var j:Int=0;j<picnum;j++)
+        {
+            let imageView:UIImageView = UIImageView();
+            let sw=bw/4;
+            var x:CGFloat = sw * CGFloat(j);
+            imageView.frame=CGRectMake(x+5, 5, sw-10, sw-10);
+            imageView.tag=indexPath.row*100+j
+            let picname:String = photoArr[j]
+            var imgurl = "http://api.bbxiaoqu.com/uploads/".stringByAppendingString(picname)
+            let nsd = NSData(contentsOfURL:NSURL(string: imgurl)!)
+            //var img = UIImage(data: nsd!,scale:1.5);  //在这里对图片显示进行比例缩放
+            imageView.image=UIImage(data: nsd!);
+            //添加边框
+            var layer:CALayer = imageView.layer
+            layer.borderColor=UIColor.lightGrayColor().CGColor
+            layer.opacity=1
+            layer.borderWidth = 1.0;
+            
+            cell.imgview.addSubview(imageView);
+        }
+        cell.delimg.hidden=true
+        cell.clickBtn.tag = indexPath.row
+        cell.clickBtn.hidden = true
+        //let tap = UITapGestureRecognizer.init(target: self, action: Selector.init("tapped:"))
+        //cell.clickBtn.addGestureRecognizer(tap)
+        
+        
+        cell.tag1.text="浏览:".stringByAppendingString((items[indexPath.row] as itemMess).visnum).stringByAppendingString("次")
+        cell.tag2.text="评论:".stringByAppendingString((items[indexPath.row] as itemMess).plnum).stringByAppendingString("次")
+        
+        if ((items[indexPath.row] as itemMess).status == "0")
+        {
+            cell.statusimg.image =  UIImage(named: "xz_qiuzhu_icon")
+        }else if ((items[indexPath.row] as itemMess).status == "1")
+        {
+            cell.statusimg.image = UIImage(named: "xz_qiuzhu_icon")
+        }else if ((items[indexPath.row] as itemMess).status == "2")
+        {
+            cell.statusimg.image = UIImage(named: "xz_yijiejue_icon")
+        }
+        
+        
+        
+        
+        return cell
+        
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
@@ -212,6 +262,14 @@ class GzInfosTableViewController: UITableViewController {
         
     }
     
+    
+    
+    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath:NSIndexPath) -> CGFloat
+    {
+                   return 250;
+        
+    }
+
     
     
     
@@ -253,10 +311,80 @@ class GzInfosTableViewController: UITableViewController {
                             
                         }
                         let guid:String = data.objectForKey("guid") as! String;
-                        let sendtime:String = data.objectForKey("sendtime") as! String;
-                        let address:String = data.objectForKey("address") as! String;
+                        let sendtime:String;
+                        var temptime:String=data.objectForKey("sendtime") as! String;
+                        
+                        
+                        
+                        //temptime	String	"2016-04-06 13:40:11"
+                        
+                        var date:NSDate = NSDate()
+                        var formatter:NSDateFormatter = NSDateFormatter()
+                        formatter.dateFormat = "yyyy-MM-dd"
+                        var dateString = formatter.stringFromDate(date)
+                        
+                        if(temptime.containsString(dateString))
+                        {
+                            sendtime = temptime.subStringFrom(11)
+                            
+                        }else
+                        {
+                            
+                            sendtime = (temptime as NSString).substringWithRange(NSRange(location: 0,length: 10))
+                        }
+                        
+                        
+                        
+                        //let address:String = data.objectForKey("address") as! String;
+                        
                         let lng:String = data.objectForKey("lng") as! String;
                         let lat:String = data.objectForKey("lat") as! String;
+                        
+                        
+                        var lat_1=(lat as NSString).doubleValue;
+                        var lng_1=(lng as NSString).doubleValue;
+                        
+                        let defaults = NSUserDefaults.standardUserDefaults();
+                        let userid = defaults.objectForKey("userid") as! String;
+                        //                            let mylat = defaults.objectForKey("lat") as! String;
+                        //                            let mylng = defaults.objectForKey("lng") as! String;
+                        
+                        
+                        var lat_2=(lat as NSString).doubleValue;
+                        var lng_2=(lng as NSString).doubleValue;
+                        var address:String="";
+                        
+                        if(false)
+                        {
+                            var currentLocation:CLLocation = CLLocation(latitude:lat_1,longitude:lng_1);
+                            var targetLocation:CLLocation = CLLocation(latitude:lat_2,longitude:lng_2);
+                            
+                            
+                            var distance:CLLocationDistance=currentLocation.distanceFromLocation(targetLocation);
+                            address = ("\(distance)米");
+                        }else
+                        {
+                            var p1:BMKMapPoint = BMKMapPointForCoordinate(CLLocationCoordinate2D(latitude: lat_1, longitude: lng_1))
+                            var p2:BMKMapPoint = BMKMapPointForCoordinate(CLLocationCoordinate2D(latitude: lat_2, longitude: lng_2))
+                            //var a2:BMKMapPoint = CLLocationCoordinate2D(latitude: lat_2, longitude: lng_2)
+                            
+                            var distance:CLLocationDistance = BMKMetersBetweenMapPoints(p1, p2);
+                            
+                            
+                            var one:UInt32 = UInt32(distance)
+                            if(one>1000)
+                            {
+                                address = ("\(self.roundoff(Double(one)/1000))千米");
+                            }else
+                            {
+                                address = ("\(one)米");
+                            }
+                        }
+                        
+                        
+                        
+                        let city:String = data.objectForKey("city") as! String;
+                        let street:String = data.objectForKey("street") as! String;
                         let photo:String = data.objectForKey("photo") as! String;
                         var community:String = ""
                         if(data.objectForKey("community")!.isKindOfClass(NSNull))
@@ -271,7 +399,10 @@ class GzInfosTableViewController: UITableViewController {
                         let status:String = data.objectForKey("status") as! String;
                         let visit:String = data.objectForKey("visit") as! String;
                         let plnum:String = data.objectForKey("plnum") as! String;
-                        let item_obj:itemMess = itemMess(userid: senduserid, vname: sendnickname, vtime: sendtime, vaddress: address, vcontent: content, vcommunity: community, vlng: lng, vlat: lat, vguid: guid, vinfocatagory: infocatagroy, vphoto: photo, status: status, visnum: visit, plnum: plnum)
+                        let headface:String = data.objectForKey("headface") as! String;
+                        let sex:String = data.objectForKey("sex") as! String;
+
+                        let item_obj:itemMess = itemMess(userid: senduserid,headface:headface,sex:sex, vname: sendnickname, vtime: sendtime, city: city,street: street,vaddress: address, vcontent: content, vcommunity: community, vlng: lng, vlat: lat, vguid: guid, vinfocatagory: infocatagroy, vphoto: photo, status: status, visnum: visit, plnum: plnum)
                         self.items.append(item_obj)
                         
                     }
@@ -287,7 +418,15 @@ class GzInfosTableViewController: UITableViewController {
         }
         
     }
-
+    func roundoff(x:Double)->Int
+    {
+        var a:Int = Int(x)
+        var b:Double = Double(a)+0.5
+        if(x>b)
+        { return a+1 }
+        else
+        { return a}
+    }
     /*
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("reuseIdentifier", forIndexPath: indexPath)
