@@ -34,7 +34,7 @@ class FourViewController: UIViewController,UINavigationControllerDelegate{
         //self.view.backgroundColor=UIColor.grayColor()
         // Do any additional setup after loading the view.
             self.navigationItem.title="个人中心"
-        self.navigationItem.leftBarButtonItem=UIBarButtonItem(title: "返回", style: UIBarButtonItemStyle.Done, target: self, action: "backClick")
+        self.navigationItem.leftBarButtonItem=UIBarButtonItem(title: "返回", style: UIBarButtonItemStyle.Done, target: self, action: #selector(FourViewController.backClick))
         
         
         
@@ -64,10 +64,10 @@ class FourViewController: UIViewController,UINavigationControllerDelegate{
     }
     
     @IBAction func recent(sender: UIButton) {
-        let sb = UIStoryboard(name:"Main", bundle: nil)
-        var vc = sb.instantiateViewControllerWithIdentifier("recentviewcontroller") as! RecentTableViewController
-        self.navigationController?.pushViewController(vc, animated: true)
-
+//        let sb = UIStoryboard(name:"Main", bundle: nil)
+//        var vc = sb.instantiateViewControllerWithIdentifier("recentviewcontroller") as! RecentTableViewController
+//        self.navigationController?.pushViewController(vc, animated: true)
+//
     }
     
     
@@ -94,9 +94,9 @@ class FourViewController: UIViewController,UINavigationControllerDelegate{
     }
    
     @IBAction func setting(sender: UIButton) {
-        var sb = UIStoryboard(name:"Main", bundle: nil)
-        var vc = sb.instantiateViewControllerWithIdentifier("settingviewcontroller") as! SettingViewController
-        self.navigationController?.pushViewController(vc, animated: true)
+//        var sb = UIStoryboard(name:"Main", bundle: nil)
+//        var vc = sb.instantiateViewControllerWithIdentifier("settingviewcontroller") as! SettingViewController
+//        self.navigationController?.pushViewController(vc, animated: true)
     
     }
     @IBAction func offline(sender: UIButton) {
